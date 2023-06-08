@@ -1,3 +1,4 @@
+﻿using Hydrate_App.ViewModels;
 ﻿using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 
@@ -20,6 +21,8 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+
+		builder.Services.AddSingleton<HydrateViewModel>();
 
 		return builder.Build();
 	}
