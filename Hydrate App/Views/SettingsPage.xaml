@@ -71,10 +71,6 @@
                         <TimePicker 
                             Grid.Column="0"
                             Grid.Row="1"
-                            Format="HH:mm"
-                            FontSize="Medium"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
                             IsVisible="{Binding IsDoNotDisturbEnabled}"
                             TextColor="{StaticResource Black}"
                             Time="{Binding DoNotDisturbStartTime}"/>
@@ -82,10 +78,6 @@
                         <TimePicker 
                             Grid.Column="1"
                             Grid.Row="1"
-                            Format="HH:mm"
-                            FontSize="Medium"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
                             IsVisible="{Binding IsDoNotDisturbEnabled}"
                             TextColor="{StaticResource Black}"
                             Time="{Binding DoNotDisturbEndTime}"/>
