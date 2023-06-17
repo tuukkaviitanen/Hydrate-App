@@ -37,9 +37,9 @@
                         ThumbColor="{StaticResource PrimaryDark}"
                         MinimumTrackColor="{StaticResource PrimaryDark}"
                         MaximumTrackColor="{StaticResource Gray500}"
-                        Value="{Binding HydrateIntervalInMinutes}"
                         Maximum="{Binding MaximumHydrateInterval}"
                         Minimum="{Binding MinimumHydrateInterval}"
+                        Value="{Binding HydrateIntervalInMinutes}"
                         />
                 </VerticalStackLayout>
 
