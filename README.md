@@ -11,28 +11,28 @@ A drink-reminder-app created with .NET MAUI for Android with customisable drinki
 ## Images
 <img
   alt="All_Closed"
-  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/70df7b94-ef15-444e-9003-50c9bfa0e9cc"
+  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/d0f7088d-da94-4640-aa8d-721f550ed0fc"
   width="300"/>
 <img
   alt="Do_Not_Disturb_Off"
-  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/4d556edf-cf51-4684-a7a7-836347e83207" 
+  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/44302f00-00f4-4fb7-9d8d-1cae9369d18c" 
   width="300"/>
 <img
   alt="Do_Not_Disturb_On"
-  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/4611698f-3172-4f6b-945f-af1327720216"
+  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/e71fb82e-4873-4ecb-bc85-ee88339d31cd"
   width="300"/>
 <img
   alt="Dark_Mode"
-  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/93fd3b45-2d21-4dbf-8d19-f79ca72ee8a6"
+  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/8a3192a9-b2e3-497d-ac5a-4d5bc8d78c55"
   width="300"/>
   
 <img
   alt="Notification_Icon"
-  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/a08e4126-7fb7-4c6c-8d70-84b485e4129f"
+  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/77d7b9db-a62e-4880-8928-b635326a9d82"
   width="300"/>
 <img 
   alt="Notification"
-  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/3409b55e-7585-4599-8721-69d7206debdf"
+  src="https://github.com/tuukkaviitanen/Hydrate-App/assets/97726090/3a2bb49f-2a34-4d0c-ae51-d89cd64d88e0"
   width="300"/>
 
 ## NuGet packages used
