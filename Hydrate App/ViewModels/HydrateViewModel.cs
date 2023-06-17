@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Hydrate_App.Services;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.AndroidOption;
@@ -18,26 +19,55 @@ public partial class HydrateViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isHydrationTimerEnabled;
 
-    [ObservableProperty]
-    private bool _isDoNotDisturbEnabled;
+    private bool _isDoNotDisturbEnabled = PreferenceService.IsDoNotDisturbEnabled;
+    public bool IsDoNotDisturbEnabled
+    {
+        get => _isDoNotDisturbEnabled;
+        set
+        {
+            SetProperty(ref _isDoNotDisturbEnabled, value);
+            PreferenceService.IsDoNotDisturbEnabled = value;
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HydrateActiveLabel))]
     bool _notificationActive;
     public string HydrateActiveLabel => (NotificationActive) ? "Active" : "Inactive";
 
-    [ObservableProperty]
-    TimeSpan _doNotDisturbStartTime;
+    TimeSpan _doNotDisturbStartTime = PreferenceService.DoNotDisturbStartTime;
 
-    [ObservableProperty]
-    TimeSpan _doNotDisturbEndTime;
+    public TimeSpan DoNotDisturbStartTime
+    {
+        get => _doNotDisturbStartTime;
+        set
+        {
+            SetProperty(ref  _doNotDisturbStartTime, value);
+            PreferenceService.DoNotDisturbStartTime = value;
+        }
+    }
 
+    TimeSpan _doNotDisturbEndTime = PreferenceService.DoNotDisturbEndTime;
+    public TimeSpan DoNotDisturbEndTime
+    {
+        get => _doNotDisturbEndTime;
+        set
+        {
+            SetProperty(ref _doNotDisturbEndTime, value);
+            PreferenceService.DoNotDisturbEndTime = value;
+        }
+    }
 
-    int hydrateIntervalInMinutes;
+    int _hydrateIntervalInMinutes = PreferenceService.HydrateIntervalInMinutes;
     public int HydrateIntervalInMinutes
     {
-        get => hydrateIntervalInMinutes;
-        set => SetProperty(ref hydrateIntervalInMinutes, (int)(Math.Round(value / (double)MinimumHydrateInterval) * MinimumHydrateInterval));
+        get => _hydrateIntervalInMinutes;
+        set
+        {
+            var result = (int)(Math.Round(value / (double)MinimumHydrateInterval) * MinimumHydrateInterval);
+            SetProperty(ref _hydrateIntervalInMinutes, result);
+            PreferenceService.HydrateIntervalInMinutes = result;
+        }
     }
 
     public HydrateViewModel(INotificationService notificationService, ILogger<HydrateViewModel> logger) : base("Hydrate")
