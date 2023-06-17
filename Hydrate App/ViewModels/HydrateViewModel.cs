@@ -5,15 +5,24 @@ using Microsoft.Extensions.Logging;
 
 namespace Hydrate_App.ViewModels;
 
+/// <summary>
+/// ViewModel for Hydration notifier
+/// </summary>
 public partial class HydrateViewModel : BaseViewModel
 {
     readonly HydrationNotificationService _notificationService;
     readonly ILogger<HydrateViewModel> _logger;
 
+    // Only non-static properties can be read from View
     public int MinimumHydrateInterval => 5;
     public int MaximumHydrateInterval => 120;
 
+    /// <summary>
+    /// True if Hydration notifications are enabled. 
+    /// When changed/set, enables or disables notifications
+    /// </summary>
     private bool _isHydrationTimerEnabled;
+    /// <inheritdoc cref="_isHydrationTimerEnabled"/>
     public bool IsHydrationTimerEnabled
     {
         get => _isHydrationTimerEnabled;
@@ -32,46 +41,36 @@ public partial class HydrateViewModel : BaseViewModel
         }
     }
 
-    private bool _isDoNotDisturbEnabled = PreferenceService.IsDoNotDisturbEnabled;
-    public bool IsDoNotDisturbEnabled
-    {
-        get => _isDoNotDisturbEnabled;
-        set
-        {
-            SetProperty(ref _isDoNotDisturbEnabled, value);
-            OnPropertyChanged(nameof(IsUnsavedChanges));
-        }
-    }
-
+    /// <summary>
+    /// True if Do-Not-Disturb is enabled. 
+    /// Also notifies <see cref="IsUnsavedChanges"/> that there might be unsaved changes
+    /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HydrateActiveLabel))]
-    bool _notificationActive;
-    public string HydrateActiveLabel => (NotificationActive) ? "Active" : "Inactive";
+    [NotifyPropertyChangedFor(nameof(IsUnsavedChanges))]
+    private bool _isDoNotDisturbEnabled = PreferenceService.IsDoNotDisturbEnabled;
 
+    /// <summary>
+    /// Starting time of Do-Not-Disturb.
+    /// Also notifies <see cref="IsUnsavedChanges"/> that there might be unsaved changes
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUnsavedChanges))]
     TimeSpan _doNotDisturbStartTime = PreferenceService.DoNotDisturbStartTime;
 
-    public TimeSpan DoNotDisturbStartTime
-    {
-        get => _doNotDisturbStartTime;
-        set
-        {
-            SetProperty(ref  _doNotDisturbStartTime, value);
-            OnPropertyChanged(nameof(IsUnsavedChanges));
-        }
-    }
-
+    /// <summary>
+    /// Ending time of Do-Not-Disturb.
+    /// Also notifies <see cref="IsUnsavedChanges"/> that there might be unsaved changes
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUnsavedChanges))]
     TimeSpan _doNotDisturbEndTime = PreferenceService.DoNotDisturbEndTime;
-    public TimeSpan DoNotDisturbEndTime
-    {
-        get => _doNotDisturbEndTime;
-        set
-        {
-            SetProperty(ref _doNotDisturbEndTime, value);
-            OnPropertyChanged(nameof(IsUnsavedChanges));
-        }
-    }
 
+    /// <summary>
+    /// Hydration notification interval in full minutes.
+    /// Also notifies <see cref="IsUnsavedChanges"/> that there might be unsaved changes
+    /// </summary>
     int _hydrateIntervalInMinutes = PreferenceService.HydrateIntervalInMinutes;
+    /// <inheritdoc cref="_hydrateIntervalInMinutes"/>
     public int HydrateIntervalInMinutes
     {
         get => _hydrateIntervalInMinutes;
@@ -83,22 +82,30 @@ public partial class HydrateViewModel : BaseViewModel
         }
     }
 
-    public bool IsUnsavedChanges => _hydrateIntervalInMinutes != PreferenceService.HydrateIntervalInMinutes ||
-        _doNotDisturbStartTime != PreferenceService.DoNotDisturbStartTime ||
-        _doNotDisturbEndTime != PreferenceService.DoNotDisturbEndTime ||
-        _isDoNotDisturbEnabled != PreferenceService.IsDoNotDisturbEnabled;
+    /// <summary>
+    /// True if there are any differences between saved preferences and current ViewModel values
+    /// </summary>
+    public bool IsUnsavedChanges => HydrateIntervalInMinutes != PreferenceService.HydrateIntervalInMinutes ||
+        DoNotDisturbStartTime != PreferenceService.DoNotDisturbStartTime ||
+        DoNotDisturbEndTime != PreferenceService.DoNotDisturbEndTime ||
+        IsDoNotDisturbEnabled != PreferenceService.IsDoNotDisturbEnabled;
 
     public HydrateViewModel(HydrationNotificationService notificationService, ILogger<HydrateViewModel> logger) : base("Hydrate")
     {
         _notificationService = notificationService;
         _logger = logger;
 
+        // Runs async task to check if Hydration notifications are enabled in NotificationService
         Task.Run(async () => IsHydrationTimerEnabled = await _notificationService.IsNotificationActive());
 
         _logger.LogInformation("{} started", this);
 
     }
 
+    /// <summary>
+    /// Sets current ViewModel values to Preferences. 
+    /// Sets a new reoccurring notification through <see cref="HydrationNotificationService"/>.
+    /// </summary>
     [RelayCommand]
     public async Task SetNotification()
     {
@@ -110,7 +117,7 @@ public partial class HydrateViewModel : BaseViewModel
         PreferenceService.DoNotDisturbEndTime = DoNotDisturbEndTime;
         PreferenceService.HydrateIntervalInMinutes = HydrateIntervalInMinutes;
 
-        NotificationActive = await _notificationService.SetNotification(
+        IsHydrationTimerEnabled = await _notificationService.SetNotification(
             HydrateIntervalInMinutes, 
             IsDoNotDisturbEnabled, 
             DoNotDisturbStartTime, 
@@ -120,6 +127,9 @@ public partial class HydrateViewModel : BaseViewModel
         IsBusy = false;
     }
 
+    /// <summary>
+    /// Cancels reoccurring notifications through <see cref="HydrationNotificationService"/>.
+    /// </summary>
     public void CancelNotification()
     {
         _notificationService.CancelNotifications();

@@ -1,5 +1,8 @@
 ﻿
 namespace Hydrate_App.Services;
+/// <summary>
+/// Uses <see cref="Preferences"/> to save and load values even after application is closed.
+/// </summary>
 public static class PreferenceService
 {
     public static int HydrateIntervalInMinutes
@@ -7,8 +10,6 @@ public static class PreferenceService
         get => Preferences.Get("HydrateIntervalInMinutes", default(int));
         set => Preferences.Set("HydrateIntervalInMinutes", value);
     }
-
-
     public static bool IsDoNotDisturbEnabled
     {
         get => Preferences.Get("IsDoNotDisturbEnabled", default(bool));

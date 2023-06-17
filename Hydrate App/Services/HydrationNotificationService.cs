@@ -23,6 +23,7 @@ public class HydrationNotificationService
         {
             _notificationService.CancelAll();
 
+            // Checks Notification permissions
             while (await _notificationService.AreNotificationsEnabled() is false)
             {
                 await _notificationService.RequestNotificationPermission();
