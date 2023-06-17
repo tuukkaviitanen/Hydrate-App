@@ -11,10 +11,11 @@
             
                 <Grid 
                     ColumnDefinitions="*,*"
-                    RowDefinitions="*,*,*,*">
+                    RowDefinitions="auto,auto,auto,auto">
                     <Label 
                         Grid.Column="0"
                         Grid.Row="0"
+                        FontSize="Medium"
                         HorizontalTextAlignment="Center"
                         VerticalTextAlignment="Center"
                         Text="Enable Hydrate timer"
@@ -62,6 +63,7 @@
                             Grid.Row="0"
                             HorizontalTextAlignment="Center"
                             VerticalTextAlignment="Center"
+                            FontSize="Medium"
                             Text="Enable Do Not Disturb -Mode"
                             TextColor="{StaticResource Black}"/>
                         <CheckBox 
