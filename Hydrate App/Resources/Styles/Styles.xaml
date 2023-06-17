@@ -176,6 +176,23 @@
         </Setter>
     </Style>
 
+    <Style TargetType="Label" x:Key="BaseLabel">
+        <Setter Property="TextColor" Value="{StaticResource Black}"/>
+        <Setter Property="HorizontalTextAlignment" Value="Center"/>
+        <Setter Property="VerticalTextAlignment" Value="Center"/>
+
+    </Style>
+    
+    <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}" x:Key="MediumLabel">
+        <Setter Property="FontSize" Value="Medium"/>
+
+    </Style>
+
+    <Style TargetType="Label" BasedOn="{StaticResource BaseLabel}" x:Key="LargeLabel">
+        <Setter Property="FontSize" Value="Medium"/>
+
+    </Style>
+
     <Style TargetType="ListView">
         <Setter Property="SeparatorColor" Value="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}" />
         <Setter Property="RefreshControlColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
@@ -351,7 +368,7 @@
     </Style>
 
     <Style TargetType="TimePicker">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
+        <Setter Property="TextColor" Value="{StaticResource Black}" />
         <Setter Property="BackgroundColor" Value="Transparent"/>
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
         <Setter Property="FontAttributes" Value="Bold" />

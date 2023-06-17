@@ -14,109 +14,96 @@
                         ColumnDefinitions="*,*">
                         <Label 
                             Grid.Column="0"
-                            FontSize="Medium"
-                            HorizontalTextAlignment="Center"
-                            VerticalTextAlignment="Center"
-                            Text="Enable Hydrate timer"
-                            TextColor="{StaticResource Black}"/>
+                            Style="{StaticResource MediumLabel}"
+                            Text="Enable Hydrate timer"/>
                         <CheckBox 
                             Grid.Column="1"
                             IsChecked="{Binding IsHydrationTimerEnabled}"/>
                     </Grid>
-                    
 
                     <VerticalStackLayout 
-                        Margin="20"
-                        IsVisible="{Binding IsHydrationTimerEnabled}"
-                        Spacing="10">
-                        <Label
-                            FontSize="Large"
-                            HorizontalTextAlignment="Center"
-                            TextColor="Black"
-                            Text="Hydration interval"/>
-                        <Label
-                            HorizontalTextAlignment="Center"
-                            Text="{Binding HydrateIntervalInMinutes, StringFormat='{0} Minutes'}"
-                            TextColor="Black"
-                            FontSize="Medium"/>
-                        <Slider
-                            ThumbColor="{StaticResource PrimaryDark}"
-                            MinimumTrackColor="{StaticResource PrimaryDark}"
-                            MaximumTrackColor="{StaticResource Gray500}"
-                            Maximum="{Binding MaximumHydrateInterval}"
-                            Minimum="{Binding MinimumHydrateInterval}"
-                            Value="{Binding HydrateIntervalInMinutes}"
-                            />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout 
-                        Margin="30,10"
+                        Spacing="10"
+                        Margin="20,20,20,0"
                         IsVisible="{Binding IsHydrationTimerEnabled}">
-                        <Grid 
-                            ColumnDefinitions="*,*">
-                            <Label 
-                                Grid.Column="0"
-                                HorizontalTextAlignment="Center"
-                                VerticalTextAlignment="Center"
-                                FontSize="Medium"
-                                Text="Enable Do Not Disturb -Mode"
-                                TextColor="{StaticResource Black}"/>
+                        <VerticalStackLayout 
+                            Spacing="10">
+                            <Label
+                                Style="{StaticResource LargeLabel}"
+                                Text="Hydration interval"/>
+                            <Label
+                                Style="{StaticResource MediumLabel}"
+                                Text="{Binding HydrateIntervalInMinutes, StringFormat='{0} Minutes'}"
+                            />
+                            <Slider
+                                    ThumbColor="{StaticResource PrimaryDark}"
+                                    MinimumTrackColor="{StaticResource PrimaryDark}"
+                                    MaximumTrackColor="{StaticResource Gray500}"
+                                    Maximum="{Binding MaximumHydrateInterval}"
+                                    Minimum="{Binding MinimumHydrateInterval}"
+                                    Value="{Binding HydrateIntervalInMinutes}"/>
+                        </VerticalStackLayout>
 
-                            <CheckBox 
-                                Grid.Column="2"
-                                IsChecked="{Binding IsDoNotDisturbEnabled}"/>
-                        </Grid>
+                        <VerticalStackLayout Margin="20">
+                            <Grid 
+                                ColumnDefinitions="*,*">
+                                <Label 
+                                    Grid.Column="0"
+                                    Style="{StaticResource MediumLabel}"
+                                    Text="Enable Do Not Disturb -Mode"/>
 
-                        <Grid
-                            IsVisible="{Binding IsDoNotDisturbEnabled}"
-                            ColumnDefinitions="*,*,*,*">
-                            <Label 
-                                Grid.Column="0"
-                                Grid.Row="1"
-                                TextColor="Black"
-                                HorizontalTextAlignment="Center"
-                                VerticalTextAlignment="Center"
-                                FontSize="Medium"
-                                Text="From" />
+                                <CheckBox 
+                                    Grid.Column="1"
+                                    IsChecked="{Binding IsDoNotDisturbEnabled}"/>
+                            </Grid>
 
-                            <TimePicker 
-                                Grid.Column="1"
-                                Grid.Row="1"
-                                TextColor="{StaticResource Black}"
-                                Time="{Binding DoNotDisturbStartTime}"/>
+                            <Grid
+                                IsVisible="{Binding IsDoNotDisturbEnabled}"
+                                ColumnDefinitions="*,*,*,*">
+                                <Label 
+                                    Style="{StaticResource MediumLabel}"
+                                    Grid.Column="0"
+                                    Grid.Row="1"
+                                    Text="From" />
 
-                            <Label 
-                                Grid.Column="2"
-                                Grid.Row="1"
-                                TextColor="Black"
-                                HorizontalTextAlignment="Center"
-                                VerticalTextAlignment="Center"
-                                FontSize="Medium"
-                                Text="Until" />
+                                <TimePicker 
+                                    Grid.Column="1"
+                                    Grid.Row="1"
+                                    Time="{Binding DoNotDisturbStartTime}"/>
 
-                            <TimePicker 
-                                Grid.Column="3"
-                                Grid.Row="1"
-                                TextColor="{StaticResource Black}"
-                                Time="{Binding DoNotDisturbEndTime}"/>
-                        </Grid>
+                                <Label 
+                                    Grid.Column="2"
+                                    Grid.Row="1"
+                                    Style="{StaticResource MediumLabel}"
+                                    Text="Until" />
+
+                                <TimePicker 
+                                    Grid.Column="3"
+                                    Grid.Row="1"
+                                    Time="{Binding DoNotDisturbEndTime}"/>
+                            </Grid>
+
+
+                        </VerticalStackLayout>
                         
-                    
+                        <VerticalStackLayout>
+                            <Label 
+                                TextColor="{StaticResource Gray300}"
+                                Style="{StaticResource BaseLabel}"
+                                IsVisible="{Binding IsUnsavedChanges}"
+                                Text="(Unsaved changes)"/>
+
+                            <Button 
+                                BorderColor="{StaticResource PrimaryDark}"
+                                BorderWidth="1"
+                                Text="Save Changes"
+                                BackgroundColor="{StaticResource White}"
+                                TextColor="{StaticResource PrimaryDark}"
+                                Command="{Binding SetNotificationCommand}"
+                            />
+                        </VerticalStackLayout>
+                        
                     </VerticalStackLayout>
-
-                    <Label 
-                        TextColor="{StaticResource Gray300}"
-                        HorizontalTextAlignment="Center"
-                        IsVisible="{Binding IsUnsavedChanges}"
-                        Text="(Unsaved changes)"/>
-
-                    <Button 
-                        BorderColor="{StaticResource PrimaryDark}"
-                        BorderWidth="1"
-                        Text="Save Changes"
-                        IsVisible="{Binding IsHydrationTimerEnabled}"
-                        Command="{Binding SetNotificationCommand}"
-                        />
+                   
 
 
 
