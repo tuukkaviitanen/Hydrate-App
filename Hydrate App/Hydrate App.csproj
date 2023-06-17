@@ -71,6 +71,9 @@
 
 	<ItemGroup>
 	  <None Remove="Resources\Images\bubble.png" />
+	  <None Remove="Resources\Images\droplet_solid.svg" />
+	  <None Remove="Resources\Images\gear_solid.svg" />
+	  <None Remove="Resources\Images\glass_water_solid.svg" />
 	</ItemGroup>
 
 	<ItemGroup>
