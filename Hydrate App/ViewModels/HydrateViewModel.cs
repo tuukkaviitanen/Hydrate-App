@@ -95,8 +95,14 @@ public partial class HydrateViewModel : BaseViewModel
         _notificationService = notificationService;
         _logger = logger;
 
-        // Runs async task to check if Hydration notifications are enabled in NotificationService
-        Task.Run(async () => IsHydrationTimerEnabled = await _notificationService.IsNotificationActive());
+        // Runs async task to check if Hydration notifications are enabled in NotificationService.
+        // Uses private field to not call property setter and reset notifications
+        Task.Run(async () =>
+        {
+            _isHydrationTimerEnabled = await _notificationService.IsNotificationActive();
+            OnPropertyChanged(nameof(IsHydrationTimerEnabled));
+        }
+        );
 
         _logger.LogInformation("{} started", this);
 
