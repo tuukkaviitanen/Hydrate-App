@@ -67,6 +67,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\bubble.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Include="C:\PROJECTS\Hydrate App\Hydrate App\.editorconfig" />
 	</ItemGroup>
 

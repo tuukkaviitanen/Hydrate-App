@@ -6,18 +6,20 @@
              x:DataType="viewModels:HydrateViewModel"
              Title="{Binding Title}">
     <Grid
-         RowDefinitions="*,2*">
+         RowDefinitions="*,*">
 
-        <Label 
+        <Image Margin="20" Source="bubble" Grid.RowSpan="1"/>
+
+        <Label
             FontSize="50"
             TextColor="White"
             VerticalTextAlignment="Center"
             HorizontalTextAlignment="Center"
-            Text="{Binding HydrateTimer}"/>
+            Text="{Binding HydrateActiveLabel}"/>
 
-        <VerticalStackLayout 
+        <VerticalStackLayout
             Grid.Row="1">
-            
+
             <Frame
                 Margin="30">
                 <VerticalStackLayout Spacing="10">
@@ -26,12 +28,12 @@
                         HorizontalTextAlignment="Center"
                         TextColor="Black"
                         Text="Hydration interval"/>
-                    <Label 
+                    <Label
                         HorizontalTextAlignment="Center"
-                        Text="{Binding HydrateIntervalInMinutes, StringFormat='{0} Minutes'}" 
+                        Text="{Binding HydrateIntervalInMinutes, StringFormat='{0} Minutes'}"
                         TextColor="Black"
                         FontSize="Medium"/>
-                    <Slider 
+                    <Slider
                         ThumbColor="{StaticResource PrimaryDark}"
                         MinimumTrackColor="{StaticResource PrimaryDark}"
                         MaximumTrackColor="{StaticResource Gray500}"
@@ -40,15 +42,17 @@
                         Minimum="{Binding MinimumHydrateInterval}"
                         />
                 </VerticalStackLayout>
-                
+
             </Frame>
-            
+
             <Button
                 Grid.Row="2"
-                Text="Start"
-                Command="{Binding ToggleHydrationTimer}"
+                Text="{Binding NotificationActive}"
+                Command="{Binding ToggleHydrationTimerCommand}"
+                Margin="0, 20"
+                FontSize="Medium"
                 />
         </VerticalStackLayout>
-        
+
     </Grid>
 </ContentPage>

@@ -22,10 +22,9 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
-
-		builder.Services.AddSingleton<HydrateViewModel>();
-
-		builder.Services.AddSingleton<HydratePage>();
+		builder.Services
+			.AddSingleton<HydrateViewModel>()
+			.AddSingleton<HydratePage>();
 
 		return builder.Build();
 	}

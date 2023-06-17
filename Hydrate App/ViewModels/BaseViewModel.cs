@@ -10,4 +10,9 @@ public partial class BaseViewModel : ObservableObject
     [ObservableProperty]
     bool isBusy;
 
+    public BaseViewModel(string title)
+    {
+        Title = title;
+    }
+
 }
