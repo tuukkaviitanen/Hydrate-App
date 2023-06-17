@@ -9,6 +9,8 @@ public class HydrationNotificationService
     private readonly INotificationService _notificationService;
     private readonly ILogger<HydrationNotificationService> _logger;
 
+    private const int _notificationID = 800;
+
     public HydrationNotificationService(INotificationService notificationService, ILogger<HydrationNotificationService> logger)
     {
         _notificationService = notificationService;
@@ -28,6 +30,7 @@ public class HydrationNotificationService
 
             var notification = new NotificationRequest()
             {
+                NotificationId = _notificationID,
                 Title = "Time to hydrate!",
                 Description = "Your hydration timer has run out!",
                 Silent = false,
@@ -77,7 +80,16 @@ public class HydrationNotificationService
 
     public void CancelNotifications()
     {
-        _notificationService.CancelAll();
-        _notificationService.ClearAll();
+        _notificationService.Cancel(_notificationID);
+        _notificationService.Clear(_notificationID);
     }
+
+    public async Task<bool> IsNotificationActive()
+    {
+        var notificationList = await _notificationService.GetPendingNotificationList();
+
+        return notificationList.Any(x => x.NotificationId == _notificationID);
+    }
+
+
 }

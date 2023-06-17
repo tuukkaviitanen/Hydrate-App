@@ -93,7 +93,10 @@ public partial class HydrateViewModel : BaseViewModel
         _notificationService = notificationService;
         _logger = logger;
 
+        Task.Run(async () => IsHydrationTimerEnabled = await _notificationService.IsNotificationActive());
+
         _logger.LogInformation("{} started", this);
+
     }
 
     [RelayCommand]
