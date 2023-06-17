@@ -4,7 +4,7 @@ namespace Hydrate_App.Views;
 
 public partial class SettingsPage : ContentPage
 {
-	public SettingsPage(SettingsViewModel viewModel)
+	public SettingsPage(HydrateViewModel viewModel)
 	{
 		InitializeComponent();
 		BindingContext = viewModel;

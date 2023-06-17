@@ -2,9 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using Plugin.LocalNotification.AndroidOption;
 using Plugin.LocalNotification.EventArgs;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace Hydrate_App.ViewModels;
 
@@ -16,6 +15,11 @@ public partial class HydrateViewModel : BaseViewModel
     public int MinimumHydrateInterval => 5;
     public int MaximumHydrateInterval => 120;
 
+    [ObservableProperty]
+    private bool _isHydrationTimerEnabled;
+
+    [ObservableProperty]
+    private bool _isDoNotDisturbEnabled;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HydrateActiveLabel))]
@@ -23,10 +27,11 @@ public partial class HydrateViewModel : BaseViewModel
     public string HydrateActiveLabel => (NotificationActive) ? "Active" : "Inactive";
 
     [ObservableProperty]
-    TimeOnly _doNotDisturbStartTime = new TimeOnly(20, 25);
+    TimeSpan _doNotDisturbStartTime;
 
     [ObservableProperty]
-    TimeOnly _doNotDisturbEndTime = new TimeOnly(6, 00);
+    TimeSpan _doNotDisturbEndTime;
+
 
     int hydrateIntervalInMinutes;
     public int HydrateIntervalInMinutes
@@ -71,28 +76,37 @@ public partial class HydrateViewModel : BaseViewModel
             {
                 Title = "Time to hydrate!",
                 Description = "Your hydration timer has run out!",
-                Silent = true,
+                Silent = false,
+                Android = new AndroidOptions()
+                {
+                    IconSmallName = new AndroidIcon("droplet_solid"),
+                },
                 CategoryType = NotificationCategoryType.Alarm,
 
                 Schedule =
-            {
-                 NotifyTime = DateTime.Now.AddSeconds(HydrateIntervalInMinutes),
-                 RepeatType = NotificationRepeat.TimeInterval,
-                 NotifyRepeatInterval = TimeSpan.FromSeconds(HydrateIntervalInMinutes)
-            },
+                {
+#if DEBUG
+                    NotifyTime = DateTime.Now.AddSeconds(HydrateIntervalInMinutes),
+                    NotifyRepeatInterval = TimeSpan.FromSeconds(HydrateIntervalInMinutes),
+#else
+                    NotifyTime = DateTime.Now.AddMinutes(HydrateIntervalInMinutes),
+                    NotifyRepeatInterval = TimeSpan.FromMinutes(HydrateIntervalInMinutes),
+#endif
+                    RepeatType = NotificationRepeat.TimeInterval,
+                },
             };
-
-
 
             _notificationService.NotificationReceiving = (request) =>
             {
                 var timeNow = TimeOnly.FromDateTime(DateTime.Now);
+                var startTime = TimeOnly.FromTimeSpan(DoNotDisturbStartTime);
+                var endTime = TimeOnly.FromTimeSpan(DoNotDisturbEndTime);
 
-                var doNotDisturb = timeNow.IsBetween(DoNotDisturbStartTime, DoNotDisturbEndTime);
+                var doNotDisturb = IsDoNotDisturbEnabled && timeNow.IsBetween(startTime, endTime);
 
                 return Task.FromResult(new NotificationEventReceivingArgs
                 {
-                    Handled = doNotDisturb, // doesnt pop up when true
+                    Handled = doNotDisturb, // doesn't pop up when true
                     Request = request
                 });
             };
