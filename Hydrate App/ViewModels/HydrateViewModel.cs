@@ -2,22 +2,35 @@
 using CommunityToolkit.Mvvm.Input;
 using Hydrate_App.Services;
 using Microsoft.Extensions.Logging;
-using Plugin.LocalNotification;
-using Plugin.LocalNotification.AndroidOption;
-using Plugin.LocalNotification.EventArgs;
 
 namespace Hydrate_App.ViewModels;
 
 public partial class HydrateViewModel : BaseViewModel
 {
-    readonly INotificationService _notificationService;
+    readonly HydrationNotificationService _notificationService;
     readonly ILogger<HydrateViewModel> _logger;
 
     public int MinimumHydrateInterval => 5;
     public int MaximumHydrateInterval => 120;
 
-    [ObservableProperty]
     private bool _isHydrationTimerEnabled;
+    public bool IsHydrationTimerEnabled
+    {
+        get => _isHydrationTimerEnabled;
+        set
+        {
+            if (value is true)
+            {
+                SetNotificationCommand.Execute(null);
+            }
+            else
+            {
+                CancelNotification();
+            }
+
+            SetProperty(ref _isHydrationTimerEnabled, value);
+        }
+    }
 
     private bool _isDoNotDisturbEnabled = PreferenceService.IsDoNotDisturbEnabled;
     public bool IsDoNotDisturbEnabled
@@ -26,7 +39,7 @@ public partial class HydrateViewModel : BaseViewModel
         set
         {
             SetProperty(ref _isDoNotDisturbEnabled, value);
-            PreferenceService.IsDoNotDisturbEnabled = value;
+            OnPropertyChanged(nameof(IsUnsavedChanges));
         }
     }
 
@@ -43,7 +56,7 @@ public partial class HydrateViewModel : BaseViewModel
         set
         {
             SetProperty(ref  _doNotDisturbStartTime, value);
-            PreferenceService.DoNotDisturbStartTime = value;
+            OnPropertyChanged(nameof(IsUnsavedChanges));
         }
     }
 
@@ -54,7 +67,7 @@ public partial class HydrateViewModel : BaseViewModel
         set
         {
             SetProperty(ref _doNotDisturbEndTime, value);
-            PreferenceService.DoNotDisturbEndTime = value;
+            OnPropertyChanged(nameof(IsUnsavedChanges));
         }
     }
 
@@ -66,11 +79,16 @@ public partial class HydrateViewModel : BaseViewModel
         {
             var result = (int)(Math.Round(value / (double)MinimumHydrateInterval) * MinimumHydrateInterval);
             SetProperty(ref _hydrateIntervalInMinutes, result);
-            PreferenceService.HydrateIntervalInMinutes = result;
+            OnPropertyChanged(nameof(IsUnsavedChanges));
         }
     }
 
-    public HydrateViewModel(INotificationService notificationService, ILogger<HydrateViewModel> logger) : base("Hydrate")
+    public bool IsUnsavedChanges => _hydrateIntervalInMinutes != PreferenceService.HydrateIntervalInMinutes ||
+        _doNotDisturbStartTime != PreferenceService.DoNotDisturbStartTime ||
+        _doNotDisturbEndTime != PreferenceService.DoNotDisturbEndTime ||
+        _isDoNotDisturbEnabled != PreferenceService.IsDoNotDisturbEnabled;
+
+    public HydrateViewModel(HydrationNotificationService notificationService, ILogger<HydrateViewModel> logger) : base("Hydrate")
     {
         _notificationService = notificationService;
         _logger = logger;
@@ -79,83 +97,28 @@ public partial class HydrateViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    public async Task ToggleHydrationTimerAsync()
+    public async Task SetNotification()
     {
-        if(IsBusy) return;
+        if (IsBusy) return;
         else IsBusy = true;
 
-        try
-        {
-            if (NotificationActive)
-            {
-                _notificationService.CancelAll();
-                NotificationActive = false;
-                return;
-            }
+        PreferenceService.IsDoNotDisturbEnabled = IsDoNotDisturbEnabled;
+        PreferenceService.DoNotDisturbStartTime = DoNotDisturbStartTime;
+        PreferenceService.DoNotDisturbEndTime = DoNotDisturbEndTime;
+        PreferenceService.HydrateIntervalInMinutes = HydrateIntervalInMinutes;
 
+        NotificationActive = await _notificationService.SetNotification(
+            HydrateIntervalInMinutes, 
+            IsDoNotDisturbEnabled, 
+            DoNotDisturbStartTime, 
+            DoNotDisturbEndTime);
 
-            if (await _notificationService.AreNotificationsEnabled() is false)
-            {
-                await _notificationService.RequestNotificationPermission();
+        OnPropertyChanged(nameof(IsUnsavedChanges));
+        IsBusy = false;
+    }
 
-                if (await _notificationService.AreNotificationsEnabled() is false)
-                    return;
-            }
-
-            var notification = new NotificationRequest()
-            {
-                Title = "Time to hydrate!",
-                Description = "Your hydration timer has run out!",
-                Silent = false,
-                Android = new AndroidOptions()
-                {
-                    IconSmallName = new AndroidIcon("droplet_solid"),
-                },
-                CategoryType = NotificationCategoryType.Alarm,
-
-                Schedule =
-                {
-#if DEBUG
-                    NotifyTime = DateTime.Now.AddSeconds(HydrateIntervalInMinutes),
-                    NotifyRepeatInterval = TimeSpan.FromSeconds(HydrateIntervalInMinutes),
-#else
-                    NotifyTime = DateTime.Now.AddMinutes(HydrateIntervalInMinutes),
-                    NotifyRepeatInterval = TimeSpan.FromMinutes(HydrateIntervalInMinutes),
-#endif
-                    RepeatType = NotificationRepeat.TimeInterval,
-                },
-            };
-
-            _notificationService.NotificationReceiving = (request) =>
-            {
-                var timeNow = TimeOnly.FromDateTime(DateTime.Now);
-                var startTime = TimeOnly.FromTimeSpan(DoNotDisturbStartTime);
-                var endTime = TimeOnly.FromTimeSpan(DoNotDisturbEndTime);
-
-                var doNotDisturb = IsDoNotDisturbEnabled && timeNow.IsBetween(startTime, endTime);
-
-                return Task.FromResult(new NotificationEventReceivingArgs
-                {
-                    Handled = doNotDisturb, // doesn't pop up when true
-                    Request = request
-                });
-            };
-
-
-            await _notificationService.Show(notification);
-
-            NotificationActive = true;
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error while handling notifications");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-
-
+    public void CancelNotification()
+    {
+        _notificationService.CancelNotifications();
     }
 }

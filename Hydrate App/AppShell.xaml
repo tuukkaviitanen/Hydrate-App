@@ -9,11 +9,6 @@
 
     <TabBar>
         <ShellContent
-            Title="Home"
-            Icon="droplet_solid"
-            ContentTemplate="{DataTemplate views:HydratePage}"
-            Route="HydratePage" />
-        <ShellContent
             Title="Settings"
             Icon="gear_solid"
             ContentTemplate="{DataTemplate views:SettingsPage}"
