@@ -9,27 +9,25 @@
         <VerticalStackLayout>
             <Frame Margin="10">
             
-                <Grid 
-                    ColumnDefinitions="*,*"
-                    RowDefinitions="auto,auto,auto,auto">
-                    <Label 
-                        Grid.Column="0"
-                        Grid.Row="0"
-                        FontSize="Medium"
-                        HorizontalTextAlignment="Center"
-                        VerticalTextAlignment="Center"
-                        Text="Enable Hydrate timer"
-                        TextColor="{StaticResource Black}"/>
-                    <CheckBox 
-                        Grid.Column="1"
-                        Grid.Row="0"
-                        IsChecked="{Binding IsHydrationTimerEnabled}"/>
+                <VerticalStackLayout >
+                    <Grid
+                        ColumnDefinitions="*,*">
+                        <Label 
+                            Grid.Column="0"
+                            FontSize="Medium"
+                            HorizontalTextAlignment="Center"
+                            VerticalTextAlignment="Center"
+                            Text="Enable Hydrate timer"
+                            TextColor="{StaticResource Black}"/>
+                        <CheckBox 
+                            Grid.Column="1"
+                            IsChecked="{Binding IsHydrationTimerEnabled}"/>
+                    </Grid>
+                    
 
                     <VerticalStackLayout 
                         Margin="20"
                         IsVisible="{Binding IsHydrationTimerEnabled}"
-                        Grid.Row="1"
-                        Grid.ColumnSpan="2"
                         Spacing="10">
                         <Label
                             FontSize="Large"
@@ -52,8 +50,6 @@
                     </VerticalStackLayout>
 
                     <Grid 
-                        Grid.Row="2"
-                        Grid.ColumnSpan="2"
                         ColumnDefinitions="*,*"
                         RowDefinitions="*,*"
                         Margin="30,0"
@@ -66,10 +62,12 @@
                             FontSize="Medium"
                             Text="Enable Do Not Disturb -Mode"
                             TextColor="{StaticResource Black}"/>
+                        
                         <CheckBox 
                             Grid.Column="1"
                             Grid.Row="0"
                             IsChecked="{Binding IsDoNotDisturbEnabled}"/>
+                        
                         <TimePicker 
                             Grid.Column="0"
                             Grid.Row="1"
@@ -80,7 +78,6 @@
                             IsVisible="{Binding IsDoNotDisturbEnabled}"
                             TextColor="{StaticResource Black}"
                             Time="{Binding DoNotDisturbStartTime}"/>
-
 
                         <TimePicker 
                             Grid.Column="1"
@@ -97,7 +94,7 @@
 
                 
 
-                </Grid>
+                </VerticalStackLayout>
             </Frame>
         </VerticalStackLayout>
     </ScrollView>
