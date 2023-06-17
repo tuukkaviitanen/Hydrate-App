@@ -23,7 +23,9 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 		builder.Services
+			.AddSingleton<SettingsViewModel>()
 			.AddSingleton<HydrateViewModel>()
+			.AddSingleton<SettingsPage>()
 			.AddSingleton<HydratePage>();
 
 		return builder.Build();

@@ -7,9 +7,15 @@
     xmlns:views="clr-namespace:Hydrate_App.Views"
     Shell.FlyoutBehavior="Disabled">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate views:HydratePage}"
-        Route="HydratePage" />
+    <TabBar>
+        <ShellContent
+            Title="Home"
+            ContentTemplate="{DataTemplate views:HydratePage}"
+            Route="HydratePage" />
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate views:SettingsPage}"
+            Route="Settings"/>
+    </TabBar>
 
 </Shell>
