@@ -28,6 +28,8 @@ public partial class HydrateViewModel : BaseViewModel
         get => _isHydrationTimerEnabled;
         set
         {
+            if(value == _isHydrationTimerEnabled) return;
+
             if (value is true)
             {
                 SetNotificationCommand.Execute(null);
@@ -90,6 +92,9 @@ public partial class HydrateViewModel : BaseViewModel
         DoNotDisturbEndTime != PreferenceService.DoNotDisturbEndTime ||
         IsDoNotDisturbEnabled != PreferenceService.IsDoNotDisturbEnabled;
 
+    [ObservableProperty]
+    private DateTime? _upcomingNotification;
+
     public HydrateViewModel(HydrationNotificationService notificationService, ILogger<HydrateViewModel> logger) : base("Hydrate")
     {
         _notificationService = notificationService;
@@ -101,6 +106,8 @@ public partial class HydrateViewModel : BaseViewModel
         {
             _isHydrationTimerEnabled = await _notificationService.IsNotificationActive();
             OnPropertyChanged(nameof(IsHydrationTimerEnabled));
+
+            await SubscribeToUpcomingNotifications();
         }
         );
 
@@ -123,11 +130,13 @@ public partial class HydrateViewModel : BaseViewModel
         PreferenceService.DoNotDisturbEndTime = DoNotDisturbEndTime;
         PreferenceService.HydrateIntervalInMinutes = HydrateIntervalInMinutes;
 
-        IsHydrationTimerEnabled = await _notificationService.SetNotification(
+        await _notificationService.SetNotification(
             HydrateIntervalInMinutes, 
             IsDoNotDisturbEnabled, 
             DoNotDisturbStartTime, 
             DoNotDisturbEndTime);
+
+        await SubscribeToUpcomingNotifications();
 
         OnPropertyChanged(nameof(IsUnsavedChanges));
         IsBusy = false;
@@ -139,5 +148,18 @@ public partial class HydrateViewModel : BaseViewModel
     public void CancelNotification()
     {
         _notificationService.CancelNotifications();
+
+        UpcomingNotification = null;
+    }
+
+    /// <summary>
+    /// Binds upcoming notifications to <see cref="UpcomingNotification"/>
+    /// </summary>
+    public async Task SubscribeToUpcomingNotifications()
+    {
+        await _notificationService.SubscribeToUpcomingNotifications(
+            (notification) => UpcomingNotification = notification
+            );
+        
     }
 }

@@ -61,6 +61,8 @@ public class HydrationNotificationService
 
                 var doNotDisturb = isDoNotDisturbEnabled && timeNow.IsBetween(startTime, endTime);
 
+                _logger.LogInformation("NotificationReceiving {timeNow}, DoNotDisturb: {doNotDisturb}", timeNow.ToString("HH:mm:ss"), doNotDisturb);
+
                 return Task.FromResult(new NotificationEventReceivingArgs
                 {
                     Handled = doNotDisturb, // doesn't pop up when true
@@ -85,11 +87,44 @@ public class HydrationNotificationService
         _notificationService.Clear(_notificationID);
     }
 
+    /// <summary>
+    /// Checks if there are any upcoming notifications
+    /// </summary>
+    /// <returns></returns>
     public async Task<bool> IsNotificationActive()
     {
         var notificationList = await _notificationService.GetPendingNotificationList();
 
-        return notificationList.Any(x => x.NotificationId == _notificationID);
+        return notificationList.Any(x => x.NotificationId == _notificationID && x.Schedule.NotifyTime >= DateTime.Now);
+    }
+
+    /// <summary>
+    /// Subscribes to NotificationReceived event and runs given callback function when fired.
+    /// Also runs callback immediately.
+    /// </summary>
+    /// <param name="callback">Action to run when notification is received. Next notification datetime given as a parameter</param>
+    public async Task SubscribeToUpcomingNotifications(Action<DateTime?> callback)
+    {
+        callback(await GetUpcomingNotificationTime());
+
+        _notificationService.NotificationReceived += async (_) =>
+        {
+            callback(await GetUpcomingNotificationTime());
+        };
+
+    }
+
+    /// <summary>
+    /// Gets next pending notification
+    /// </summary>
+    /// <returns>Next pending notification OR null if no notifications pending</returns>
+    private async Task<DateTime?> GetUpcomingNotificationTime()
+    {
+        var notificationList = await _notificationService.GetPendingNotificationList();
+        NotificationRequest? notification = notificationList
+        .FirstOrDefault(x => x.NotificationId == _notificationID && x.Schedule.NotifyTime.HasValue);
+
+        return notification?.Schedule.NotifyTime;
     }
 
 

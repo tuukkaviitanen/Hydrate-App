@@ -101,7 +101,11 @@
                                 Command="{Binding SetNotificationCommand}"
                             />
                         </VerticalStackLayout>
-                        
+
+                        <Label 
+                            Style="{StaticResource BaseLabel}"
+                            Text="{Binding UpcomingNotification, StringFormat='Next pending notification: {0:HH:mm:ss}'}"/>
+
                     </VerticalStackLayout>
                    
 
