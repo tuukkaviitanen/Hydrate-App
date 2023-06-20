@@ -14,8 +14,8 @@ public partial class HydrateViewModel : BaseViewModel
     readonly ILogger<HydrateViewModel> _logger;
 
     // Only non-static properties can be read from View
-    public int MinimumHydrateInterval => 5;
-    public int MaximumHydrateInterval => 120;
+    public int MinimumHydrateInterval => 15;
+    public int MaximumHydrateInterval => 180;
 
     /// <summary>
     /// True if Hydration notifications are enabled. 
@@ -36,7 +36,7 @@ public partial class HydrateViewModel : BaseViewModel
             }
             else
             {
-                CancelNotification();
+                CancelNotifications();
             }
 
             SetProperty(ref _isHydrationTimerEnabled, value);
@@ -104,7 +104,7 @@ public partial class HydrateViewModel : BaseViewModel
         // Uses private field to not call property setter and reset notifications
         Task.Run(async () =>
         {
-            _isHydrationTimerEnabled = await _notificationService.IsNotificationActive();
+            _isHydrationTimerEnabled = await _notificationService.AreNotificationsActive();
             OnPropertyChanged(nameof(IsHydrationTimerEnabled));
 
             await SubscribeToUpcomingNotifications();
@@ -120,17 +120,20 @@ public partial class HydrateViewModel : BaseViewModel
     /// Sets a new reoccurring notification through <see cref="HydrationNotificationService"/>.
     /// </summary>
     [RelayCommand]
-    public async Task SetNotification()
+    public async Task SetNotificationAsync()
     {
         if (IsBusy) return;
         else IsBusy = true;
+        IsRefreshing = true;
+
+        await Task.Delay(500); // Has to give time to UI to show loader after freezing
 
         PreferenceService.IsDoNotDisturbEnabled = IsDoNotDisturbEnabled;
         PreferenceService.DoNotDisturbStartTime = DoNotDisturbStartTime;
         PreferenceService.DoNotDisturbEndTime = DoNotDisturbEndTime;
         PreferenceService.HydrateIntervalInMinutes = HydrateIntervalInMinutes;
 
-        await _notificationService.SetNotification(
+        await _notificationService.CreateNotifications(
             HydrateIntervalInMinutes, 
             IsDoNotDisturbEnabled, 
             DoNotDisturbStartTime, 
@@ -140,12 +143,13 @@ public partial class HydrateViewModel : BaseViewModel
 
         OnPropertyChanged(nameof(IsUnsavedChanges));
         IsBusy = false;
+        IsRefreshing = false;
     }
 
     /// <summary>
     /// Cancels reoccurring notifications through <see cref="HydrationNotificationService"/>.
     /// </summary>
-    public void CancelNotification()
+    public void CancelNotifications()
     {
         _notificationService.CancelNotifications();
 

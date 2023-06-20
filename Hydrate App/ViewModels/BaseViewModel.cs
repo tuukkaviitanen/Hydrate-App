@@ -17,6 +17,12 @@ public partial class BaseViewModel : ObservableObject
     bool isBusy;
 
     /// <summary>
+    /// For activity indicators
+    /// </summary>
+    [ObservableProperty]
+    bool isRefreshing;
+
+    /// <summary>
     /// Base
     /// </summary>
     /// <param name="title">Sets the title of the ViewModel</param>

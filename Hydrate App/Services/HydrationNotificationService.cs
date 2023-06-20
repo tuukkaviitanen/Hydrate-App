@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.AndroidOption;
-using Plugin.LocalNotification.EventArgs;
+using System.Diagnostics;
 
 namespace Hydrate_App.Services;
 public class HydrationNotificationService
@@ -9,7 +9,6 @@ public class HydrationNotificationService
     private readonly INotificationService _notificationService;
     private readonly ILogger<HydrationNotificationService> _logger;
 
-    private const int _notificationID = 800;
 
     public HydrationNotificationService(INotificationService notificationService, ILogger<HydrationNotificationService> logger)
     {
@@ -17,10 +16,13 @@ public class HydrationNotificationService
         _logger = logger;
     }
 
-    public async Task<bool> SetNotification(int hydrateInterval, bool isDoNotDisturbEnabled, TimeSpan doNotDisturbStartTime, TimeSpan doNotDisturbEndTime)
+    public async Task<bool> CreateNotifications(int hydrateInterval, bool isDoNotDisturbEnabled, TimeSpan doNotDisturbStartTime, TimeSpan doNotDisturbEndTime)
     {
         try
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             _notificationService.CancelAll();
 
             // Checks Notification permissions
@@ -29,48 +31,29 @@ public class HydrationNotificationService
                 await _notificationService.RequestNotificationPermission();
             }
 
-            var notification = new NotificationRequest()
+            TimeSpan notificationInterval = TimeSpan.FromMinutes(hydrateInterval);
+            DateTime startingTime = DateTime.Now.Add(notificationInterval);
+            DateTime endTime = startingTime.AddDays(1);
+
+            var doNotDisturbStart = TimeOnly.FromTimeSpan(doNotDisturbStartTime);
+            var doNotDisturbEnd = TimeOnly.FromTimeSpan(doNotDisturbEndTime);
+
+            var tasks = new List<Task>(); // Creates a list of tasks to await at the same time instead of sequentially
+
+            for (DateTime notificationTime = startingTime; notificationTime < endTime; notificationTime = notificationTime.Add(notificationInterval))
             {
-                NotificationId = _notificationID,
-                Title = "Time to hydrate!",
-                Description = "Your hydration timer has run out!",
-                Silent = false,
-                Android = new AndroidOptions()
+                if (isDoNotDisturbEnabled && TimeOnly.FromDateTime(notificationTime).IsBetween(doNotDisturbStart, doNotDisturbEnd))
                 {
-                    IconSmallName = new AndroidIcon("droplet_solid"),
-                },
-                CategoryType = NotificationCategoryType.Alarm,
-                Schedule =
-                {
-#if DEBUG
-                    NotifyTime = DateTime.Now.AddSeconds(hydrateInterval),
-                    NotifyRepeatInterval = TimeSpan.FromSeconds(hydrateInterval),
-#else
-                    NotifyTime = DateTime.Now.AddMinutes(hydrateInterval),
-                    NotifyRepeatInterval = TimeSpan.FromMinutes(hydrateInterval),
-#endif
-                    RepeatType = NotificationRepeat.TimeInterval,
-                },
-            };
+                    continue;
+                }
 
-            _notificationService.NotificationReceiving = (request) =>
-            {
-                var timeNow = TimeOnly.FromDateTime(DateTime.Now);
-                var startTime = TimeOnly.FromTimeSpan(doNotDisturbStartTime);
-                var endTime = TimeOnly.FromTimeSpan(doNotDisturbEndTime);
+                tasks.Add(CreateNotification(tasks.Count, notificationTime));
+            }
 
-                var doNotDisturb = isDoNotDisturbEnabled && timeNow.IsBetween(startTime, endTime);
+            await Task.WhenAll(tasks); // runs all tasks parallel // might improve performance, might not // just an interesting test
 
-                _logger.LogInformation("NotificationReceiving {timeNow}, DoNotDisturb: {doNotDisturb}", timeNow.ToString("HH:mm:ss"), doNotDisturb);
-
-                return Task.FromResult(new NotificationEventReceivingArgs
-                {
-                    Handled = doNotDisturb, // doesn't pop up when true
-                    Request = request
-                });
-            };
-
-            await _notificationService.Show(notification);
+            stopWatch.Stop();
+            _logger.LogInformation("Creating notifications took {0} milliseconds, {1} notifications created", stopWatch.Elapsed.Microseconds, tasks.Count);
 
             return true;
         }
@@ -81,21 +64,44 @@ public class HydrationNotificationService
         }
     }
 
+    private async Task CreateNotification(int notificationId, DateTime notificationTime)
+    {
+        var notification = new NotificationRequest()
+        {
+            NotificationId = notificationId,
+            Title = "Time to hydrate!",
+            Description = "Your hydration timer has run out!",
+            Silent = false,
+            Android = new AndroidOptions()
+            {
+                IconSmallName = new AndroidIcon("droplet_solid"),
+            },
+            CategoryType = NotificationCategoryType.Alarm,
+            Schedule =
+            {
+                NotifyTime = notificationTime,
+                RepeatType = NotificationRepeat.Daily
+            },
+        };
+
+        await _notificationService.Show(notification);
+    }
+
     public void CancelNotifications()
     {
-        _notificationService.Cancel(_notificationID);
-        _notificationService.Clear(_notificationID);
+        _notificationService.CancelAll();
+        _notificationService.ClearAll();
     }
 
     /// <summary>
     /// Checks if there are any upcoming notifications
     /// </summary>
     /// <returns></returns>
-    public async Task<bool> IsNotificationActive()
+    public async Task<bool> AreNotificationsActive()
     {
         var notificationList = await _notificationService.GetPendingNotificationList();
 
-        return notificationList.Any(x => x.NotificationId == _notificationID && x.Schedule.NotifyTime >= DateTime.Now);
+        return notificationList.Any(x => x.Schedule?.NotifyTime >= DateTime.Now);
     }
 
     /// <summary>
@@ -121,8 +127,8 @@ public class HydrationNotificationService
     private async Task<DateTime?> GetUpcomingNotificationTime()
     {
         var notificationList = await _notificationService.GetPendingNotificationList();
-        NotificationRequest? notification = notificationList
-        .FirstOrDefault(x => x.NotificationId == _notificationID && x.Schedule.NotifyTime.HasValue);
+        NotificationRequest? notification = notificationList.OrderBy(x => x.Schedule.NotifyTime)
+            .FirstOrDefault(x => x.Schedule.NotifyTime.HasValue && x.Schedule.NotifyTime.Value > DateTime.Now);
 
         return notification?.Schedule.NotifyTime;
     }
